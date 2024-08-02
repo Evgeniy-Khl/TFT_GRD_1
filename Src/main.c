@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -30,7 +29,6 @@
 #include "ili9341_touch.h"
 #include "ds18b20.h"
 #include "displ.h"
-#include "FatFsAPI.h"
 #include "rtc.h"
 #include "my.h"
 /* USER CODE END Includes */
@@ -61,26 +59,22 @@ TIM_HandleTypeDef htim1;
 RTC_TimeTypeDef sTime;
 RTC_DateTypeDef sDate;
 
-char fileName[15]={0};
-char txt[10];
-char buffTFT[LEN_BUFF];
+char buffTFT[40];
 const char* modeName[4]={"СУШЫННЯ","ОБЖАРКА","КОПЧЕННЯ","ВАРЫННЯ"};
-const char* setName[MAX_SET]={"РЕЖИМ","t КАМЕРИ","t ПРОДУКТА","ТРИВАЛЫСТЬ"};
-int16_t set[MAX_SET]={0,75,65,120}, newval[MAX_SET]={0};
-uint8_t displ_num=0, newButt=1, ticTimer, ticTouch, show, Y_txt=5, X_left=5, Y_top, Y_bottom=ILI9341_HEIGHT-22, buttonAmount, secTick, card=0, status=0;
-uint8_t familycode[MAX_DEVICE][8];
+const char* setName[MAX_SET]={"РЕЖИМ","t КАМЕРИ","t ПРОДУКТА","ТРИВАЛЫСТЬ","ПРОДУВАННЯ"};
+int16_t set[MAX_SET], newval[MAX_SET];
+uint8_t displ_num=0, mode, newButt=1, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom=ILI9341_HEIGHT-22, buttonAmount, secTick, card=0, status=0;
+uint8_t familycode[MAX_SENSOR][8];
 int8_t ds18b20_amount, numSet=0, resetDispl=0;
-int16_t ds18b20_val[MAX_DEVICE], val_t, pvT, pvRH;
+int16_t ds18b20_val[MAX_SENSOR], val_t, pvT, pvRH;
 uint16_t touch_x, touch_y;
 uint16_t fillScreen = ILI9341_BLACK;
 uint32_t checkTime, UnixTime;
-struct ram_structure {int x,y; char w,h;} buttons[4];
 
-extern FATFS SDFatFs;
-extern FIL MyFile;
-/* GreenHouse */
+
 int8_t relaySet[8]={-1,-1,-1,-1,-1,-1,-1,-1};
 int8_t analogSet[2]={-1,-1};
+
 uint8_t relOut[8]={0}, relayOut, analogOut[4]={0};
 /* ********** */
 /* USER CODE END PV */
@@ -103,10 +97,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance == TIM1) //check if the interrupt comes from TIM1 (10 ms)
   {
     checkTime++;
-    if (ticTouch){ --ticTouch; HAL_GPIO_WritePin(Touch_GPIO_Port, Touch_Pin, GPIO_PIN_SET);}// индикация нажатия
+    if(ticTouch){ --ticTouch; HAL_GPIO_WritePin(Touch_GPIO_Port, Touch_Pin, GPIO_PIN_SET);}// индикация нажатия
     else {HAL_GPIO_WritePin(Touch_GPIO_Port, Touch_Pin, GPIO_PIN_RESET);}
     if (ticTimer){ --ticTimer;
-      if (set[3]&1) HAL_GPIO_WritePin(Alarm_GPIO_Port, Alarm_Pin, GPIO_PIN_SET); // включить тревогу
+//      if(set[3]&1) HAL_GPIO_WritePin(Alarm_GPIO_Port, Alarm_Pin, GPIO_PIN_SET); // включить тревогу
     }
     else HAL_GPIO_WritePin(Alarm_GPIO_Port, Alarm_Pin, GPIO_PIN_RESET);
   }
@@ -144,7 +138,6 @@ int main(void)
   MX_SPI2_Init();
   MX_SPI1_Init();
   MX_TIM1_Init();
-  MX_FATFS_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 //  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);  // LED_PB1=ON
@@ -155,7 +148,7 @@ int main(void)
   initData();
   //---------------------------- линия 1-Wire -----------------------------------
   ds18b20_port_init();
-  ds18b20_count(MAX_DEVICE);   // проверяем наличие датчиков если item = 0 датчики найдены
+  ds18b20_count(MAX_SENSOR);   // проверяем наличие датчиков если item = 0 датчики найдены
   if(ds18b20_amount){
     for(uint8_t i=0;i<ds18b20_amount;i++) ds18b20_val[i]=1999;
     ds18b20_Convert_T();
@@ -168,7 +161,7 @@ int main(void)
     ILI9341_WriteString(5, Y_txt, "Датчик выдносноъ вологосты 1 шт.", Font_11x18, ILI9341_CYAN, ILI9341_BLACK);
     Y_txt = Y_txt+18+5;
   }
-  HAL_Delay(3000);
+  HAL_Delay(1000);
   ILI9341_FillScreen(fillScreen);
   /* USER CODE END 2 */
 

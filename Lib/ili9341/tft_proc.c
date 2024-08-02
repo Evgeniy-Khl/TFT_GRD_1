@@ -3,17 +3,19 @@
 #include "tft_proc.h"
 #include "ili9341_touch.h"
 
+void setData(uint8_t m);
 extern int8_t relaySet[8];
 extern int8_t analogSet[2];
 extern int16_t set[MAX_SET], newval[MAX_SET];
-extern uint8_t displ_num, newButt, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom, buttonAmount, secTick, card, status;
+extern uint8_t displ_num, mode, newButt, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom, buttonAmount, secTick, card, status;
 extern int8_t ds18b20_amount, numSet, tiimeDispl;
 extern uint16_t fillScreen;
 extern int16_t ds18b20_val[];
-extern struct ram_structure {int x,y; char w,h;} buttons[];
 extern RTC_HandleTypeDef hrtc;
 extern RTC_TimeTypeDef sTime;
 extern RTC_DateTypeDef sDate;
+
+struct {int x,y; char w,h;} buttons[];
 
 void TFT_init(){
   ILI9341_Unselect();
@@ -23,12 +25,6 @@ void TFT_init(){
   Y_txt = 5; X_left = 5;
   ILI9341_WriteString(45, Y_txt, "TFT_GRD v 0.0", Font_11x18, ILI9341_YELLOW, fillScreen);
   Y_txt = Y_txt+18+5;
-//  ILI9341_WriteString(25, Y_txt, "прибор корректировки", Font_11x18, ILI9341_GREEN, fillScreen);
-//  Y_txt = Y_txt+18+5;
-//  ILI9341_WriteString(25, Y_txt, "точности измерений", Font_11x18, ILI9341_GREEN, fillScreen);
-//  Y_txt = Y_txt+18+5;
-//  ILI9341_WriteString(25, Y_txt, "датчиков температуры.", Font_11x18, ILI9341_GREEN, fillScreen);
-//  HAL_Delay(5000);
 }
 
 void WindowDraw(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t setcolor, const char* str){
@@ -172,10 +168,10 @@ void checkButtons(uint8_t item){
       case 2://--------- НАЛАШТУВАННЯ ----------------------------------
         switch (item){
           case 0: displ_num = 0; newButt = 1; break;
-          case 1: if (++numSet>4) numSet = 4;	break;
+          case 1: if (++numSet>MAX_SET) numSet = MAX_SET;	break;
           case 2: if (--numSet<0) numSet = 0;	break;
           case 3: if(numSet) {newval[numSet] = set[numSet]; displ_num = 3;} 
-                  else {newval[0] = set[0]; displ_num = 4;}
+                  else {newval[0] = mode; displ_num = 4;}
                   newButt = 1; 
           break;
         }
@@ -189,7 +185,10 @@ void checkButtons(uint8_t item){
           case 3: 
             ILI9341_FillRectangle(0, Y_top, ILI9341_WIDTH, ILI9341_HEIGHT, fillScreen);
             ILI9341_WriteString(60, Y_top+80, "ВИКОНАЮ ЗАПИС!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
+//            sprintf(buffTFT,"X=%6d Y=%6d",*x, *y);
+            ILI9341_WriteString(100, Y_bottom - 8, "counter = 0000", Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
             set[numSet] = newval[numSet];
+            
 //            writeSetToBackup(RTC_BKP_DR2);                    // запишем новые значения установок
             HAL_Delay(1000);
             displ_num = 2; newButt = 1; break;
@@ -204,8 +203,10 @@ void checkButtons(uint8_t item){
           case 3: 
             ILI9341_FillRectangle(0, Y_top, ILI9341_WIDTH, ILI9341_HEIGHT, fillScreen);
             ILI9341_WriteString(60, Y_top+80, "ВИКОНАЮ ЗАПИС!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
-            set[0] = newval[0];
-//            writeSetToBackup(RTC_BKP_DR2);                    // запишем новые значения установок
+          
+            ILI9341_WriteString(100, Y_bottom - 8, "counter = 0000", Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
+            mode = newval[0];
+            setData(mode);                    // запишем новые значения установок
             HAL_Delay(1000);
             displ_num = 2; newButt = 1;
             break;

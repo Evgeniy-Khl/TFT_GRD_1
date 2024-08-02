@@ -2,14 +2,13 @@
 #include "ili9341.h"
 #include "ds18b20.h"
 #include "displ.h"
-#include "FatFsAPI.h"
 #include "rtc.h"
 #include "my.h"
 
 extern char buffTFT[];
 extern const char* setName[];
 extern const char* modeName[];
-extern uint8_t displ_num, ds18b20_amount, ds18b20_num, familycode[][8], newButt, Y_txt, X_left, Y_top, Y_bottom, card, newDate, ticTimer, status;
+extern uint8_t displ_num, mode, ds18b20_amount, ds18b20_num, familycode[][8], newButt, Y_txt, X_left, Y_top, Y_bottom, card, newDate, ticTimer, status;
 extern int16_t ds18b20_val[], fillScreen, set[], newval[];
 extern int8_t numSet, numDate;
 extern int32_t UnixTime;
@@ -44,12 +43,11 @@ void displ_0(void){
   HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
   HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
   UnixTime = colodarToCounter();
-  if(status){
-    ILI9341_WriteString(X_left+30, Y_txt, " ON ", Font_11x18, ILI9341_BLACK, ILI9341_GREEN);
-  }
+  if(status) ILI9341_WriteString(X_left+30, Y_txt, " ON ", Font_11x18, ILI9341_BLACK, ILI9341_GREEN);
   else ILI9341_WriteString(X_left+30, Y_txt, " OFF ", Font_11x18, ILI9341_YELLOW, ILI9341_RED);
+  
   ILI9341_WriteString(X_left+110, Y_txt, "–≈∆»Ã:", Font_11x18, ILI9341_YELLOW, fillScreen);
-  sprintf(buffTFT,"%8s", modeName[set[0]]);
+  sprintf(buffTFT,"%8s", modeName[mode]);
   ILI9341_WriteString(X_left+180, Y_txt, buffTFT, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
   Y_txt = Y_txt+18+15;
   ILI9341_WriteString(X_left+50, Y_txt, "“≈Ãœ≈–¿“”–¿ ¬  ¿Ã≈–I", Font_11x18, ILI9341_YELLOW, fillScreen);
@@ -59,7 +57,7 @@ void displ_0(void){
   else if(ds18b20_val[0]<1270) sprintf(buffTFT," %3d  ", ds18b20_val[0]/10);
   else strcat(buffTFT," ***  ");
   ILI9341_WriteString(X_left+60, Y_txt, buffTFT, Font_11x18, ILI9341_BLACK, ILI9341_CYAN);
-  sprintf(buffTFT," %3i,0", set[1]);
+  sprintf(buffTFT," %3i,0", set[0]);
   ILI9341_WriteString(X_left+180, Y_txt, buffTFT, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
   Y_txt = Y_txt+18+5;
   ILI9341_WriteString(X_left+40, Y_txt, "“≈Ãœ≈–¿“”–¿ ¬ œ–Œƒ” “I", Font_11x18, ILI9341_YELLOW, fillScreen);
@@ -68,7 +66,7 @@ void displ_0(void){
   else if(ds18b20_val[1]<1270) sprintf(buffTFT," %3d  ", ds18b20_val[1]/10);
   else strcat(buffTFT," ***  ");
   ILI9341_WriteString(X_left+60, Y_txt, buffTFT, Font_11x18, ILI9341_BLACK, ILI9341_CYAN);
-  sprintf(buffTFT," %3i,0", set[2]);
+  sprintf(buffTFT," %3i,0", set[1]);
   ILI9341_WriteString(X_left+180, Y_txt, buffTFT, Font_11x18, ILI9341_BLACK, ILI9341_WHITE);
   Y_txt = Y_txt+18+5;
   ILI9341_WriteString(X_left+60, Y_txt, "“–»¬¿ÀI—“‹ –≈∆»Ã”", Font_11x18, ILI9341_YELLOW, fillScreen);
@@ -84,7 +82,7 @@ void displ_0(void){
 //-------------------------------- —“¿Õ ¬€’Œƒ≤¬ ------------------------------------------------------
 void displ_1(void){
  uint8_t i;
- char txt[20];
+ char txt[10];
  uint16_t color_txt, color_box; 
     Y_txt = Y_top;
     if(newButt){
@@ -139,9 +137,12 @@ void displ_2(void){
   }
   Y_txt = Y_txt+10;
   for (i=0; i<MAX_SET; i++){
-    if (i==0) sprintf(buffTFT,"%12s: %8s", setName[i], modeName[set[0]]);
+    if(i==0) sprintf(buffTFT,"%12s: %8s", setName[i], modeName[mode]);
     else if(i==3) sprintf(buffTFT,"%12s: %i„Ó‰.%02iı‚Î.", setName[i], set[i]/60, set[i]%60);
-    else sprintf(buffTFT,"%12s: %3i „‰.", setName[i], set[i]);
+    else {
+      sprintf(buffTFT,"%12s: %3i", setName[i], set[i]);
+      if(i==4) strcat(buffTFT,"ÒÂÍ."); else strcat(buffTFT,"„‰.");
+    }
     if(i == numSet){color_txt = ILI9341_BLACK; color_box = ILI9341_WHITE;} else {color_txt = ILI9341_WHITE; color_box = ILI9341_BLACK;}
     ILI9341_WriteString(X_left, Y_txt, buffTFT, Font_11x18, color_txt, color_box);
     Y_txt = Y_txt+18+5;

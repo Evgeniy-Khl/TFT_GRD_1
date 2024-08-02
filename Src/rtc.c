@@ -66,20 +66,6 @@ void readBackupToDate(uint32_t bkp_reg){
   HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 }
 
-// Функция сохраниения в Backup регистрах
-void writeSetToBackup(uint32_t bkp_reg){
-  for (uint8_t item = 0; item < MAX_SET; item++){
-    HAL_RTCEx_BKUPWrite(&hrtc, bkp_reg+item, set[item]);
-  }
-}
-
-// Функция чтения из Backup регистров
-void readSetToBackup(uint32_t bkp_reg){
-  for (uint8_t item = 0; item < MAX_SET; item++){
-    set[item] = HAL_RTCEx_BKUPRead(&hrtc, bkp_reg+item);
-  }
-}
-
 uint32_t colodarToCounter (void)
 {
 	uint8_t a;
