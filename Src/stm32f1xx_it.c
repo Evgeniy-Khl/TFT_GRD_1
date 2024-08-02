@@ -59,7 +59,7 @@
 extern RTC_HandleTypeDef hrtc;
 extern TIM_HandleTypeDef htim1;
 /* USER CODE BEGIN EV */
-extern uint8_t show, secTick, resetDispl, displ_num, newButt;
+extern uint8_t show, resetDispl, displ_num, newButt;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -204,7 +204,7 @@ void SysTick_Handler(void)
 void RTC_IRQHandler(void)
 {
   /* USER CODE BEGIN RTC_IRQn 0 */
-  show=1; secTick++;
+  show=1;
 //  if(resetDispl) --resetDispl; else {displ_num = 0; newButt = 1;}
   /* USER CODE END RTC_IRQn 0 */
   HAL_RTCEx_RTCIRQHandler(&hrtc);

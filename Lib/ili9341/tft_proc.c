@@ -7,7 +7,7 @@ void setData(uint8_t m);
 extern int8_t relaySet[8];
 extern int8_t analogSet[2];
 extern int16_t set[MAX_SET], newval[MAX_SET];
-extern uint8_t displ_num, mode, newButt, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom, buttonAmount, secTick, card, status;
+extern uint8_t displ_num, mode, newButt, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom, buttonAmount, status;
 extern int8_t ds18b20_amount, numSet, tiimeDispl;
 extern uint16_t fillScreen;
 extern int16_t ds18b20_val[];
@@ -137,10 +137,12 @@ void down_relay(){
 
 void up_out(){
   if(++analogSet[numSet-6]>100) analogSet[numSet-6]=100;
+  if(numSet == MAX_SET) set[MAX_SET-1] = analogSet[numSet-6];//??????????? и там и там значение ЦАП 0
 }
 
 void down_out(){
   if(--analogSet[numSet-6]<-1) analogSet[numSet-6]=-1;
+  if(numSet == MAX_SET) set[MAX_SET-1] = analogSet[numSet-6];//??????????? и там и там значение ЦАП 0
 }
 
 void checkButtons(uint8_t item){

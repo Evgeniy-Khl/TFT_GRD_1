@@ -63,13 +63,11 @@ char buffTFT[40];
 const char* modeName[4]={"ясьшммъ","нафюпйю","йновеммъ","бюпшммъ"};
 const char* setName[MAX_SET]={"пефхл","t йюлепх","t опндсйрю","рпхбюкшярэ","опндсбюммъ","ьбхдйшярэ"};
 int16_t set[MAX_SET], newval[MAX_SET];
-uint8_t displ_num=0, mode, newButt=1, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom=ILI9341_HEIGHT-22, buttonAmount, secTick, card=0, status=0;
+uint8_t displ_num=0, mode, newButt=1, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom=ILI9341_HEIGHT-22, buttonAmount, status=0;
 uint8_t familycode[MAX_SENSOR][8];
 int8_t ds18b20_amount, numSet=0, resetDispl=0;
-int16_t ds18b20_val[MAX_SENSOR], val_t, pvT, pvRH;
-uint16_t touch_x, touch_y;
-uint16_t fillScreen = ILI9341_BLACK;
-uint32_t checkTime, UnixTime;
+int16_t ds18b20_val[MAX_SENSOR], pvT, pvRH;
+uint16_t touch_x, touch_y, fillScreen = ILI9341_BLACK, checkTime;
 
 
 int8_t relaySet[8]={-1,-1,-1,-1,-1,-1,-1,-1};
