@@ -188,7 +188,7 @@ void checkButtons(uint8_t item){
           case 2: --newval[numSet];	break;
           case 3: 
             ILI9341_FillRectangle(0, Y_top, ILI9341_WIDTH, ILI9341_HEIGHT, fillScreen);
-            ILI9341_WriteString(50, Y_top+60, "ВИКОНАЮ ЗАПИС!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
+            ILI9341_WriteString(60, Y_top+80, "ВИКОНАЮ ЗАПИС!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
             set[numSet] = newval[numSet];
 //            writeSetToBackup(RTC_BKP_DR2);                    // запишем новые значения установок
             HAL_Delay(1000);
@@ -203,7 +203,7 @@ void checkButtons(uint8_t item){
           case 2: if(--newval[0]<0) newval[0] = 0;	break;
           case 3: 
             ILI9341_FillRectangle(0, Y_top, ILI9341_WIDTH, ILI9341_HEIGHT, fillScreen);
-            ILI9341_WriteString(50, Y_top+60, "ВИКОНАЮ ЗАПИС!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
+            ILI9341_WriteString(60, Y_top+80, "ВИКОНАЮ ЗАПИС!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
             set[0] = newval[0];
 //            writeSetToBackup(RTC_BKP_DR2);                    // запишем новые значения установок
             HAL_Delay(1000);

@@ -70,7 +70,7 @@ int16_t set[MAX_SET]={0,75,65,120}, newval[MAX_SET]={0};
 uint8_t displ_num=0, newButt=1, ticTimer, ticTouch, show, Y_txt=5, X_left=5, Y_top, Y_bottom=ILI9341_HEIGHT-22, buttonAmount, secTick, card=0, status=0;
 uint8_t familycode[MAX_DEVICE][8];
 int8_t ds18b20_amount, numSet=0, resetDispl=0;
-int16_t ds18b20_val[MAX_DEVICE], max_t, min_t, midl_t, val_t, pvT, pvRH;
+int16_t ds18b20_val[MAX_DEVICE], val_t, pvT, pvRH;
 uint16_t touch_x, touch_y;
 uint16_t fillScreen = ILI9341_BLACK;
 uint32_t checkTime, UnixTime;
@@ -93,7 +93,7 @@ static void MX_SPI1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
-
+void initData(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -148,12 +148,12 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 //  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);  // LED_PB1=ON
-//----------- Локальные переменные -----------
-//  uint8_t butt_num;
-//--------------------------------------------
+  
   HAL_TIM_Base_Start_IT(&htim1);          /* ------  таймер 100Гц.  период  10 мс.  ----*/
   HAL_RTCEx_SetSecond_IT(&hrtc);
   TFT_init();
+  initData();
+  //---------------------------- линия 1-Wire -----------------------------------
   ds18b20_port_init();
   ds18b20_count(MAX_DEVICE);   // проверяем наличие датчиков если item = 0 датчики найдены
   if(ds18b20_amount){
@@ -168,10 +168,8 @@ int main(void)
     ILI9341_WriteString(5, Y_txt, "Датчик выдносноъ вологосты 1 шт.", Font_11x18, ILI9341_CYAN, ILI9341_BLACK);
     Y_txt = Y_txt+18+5;
   }
-  
   HAL_Delay(3000);
   ILI9341_FillScreen(fillScreen);
-  
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -179,7 +177,7 @@ int main(void)
   while (1)
   {
     Y_txt = 5; X_left = 5;
-    //------------------------------------- ТАЧСКРИН ---------------------------
+    //-------------------------- ТАЧСКРИН ---------------------------------------
     if(ILI9341_TouchPressed()&& checkTime>40){
       uint8_t butt_num;
       if(ILI9341_TouchGetCoordinates(&touch_x, &touch_y)){
@@ -194,7 +192,8 @@ int main(void)
 //      HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);  // LED_PB1=Toggle
       show = 0;
       temperature_check();
-      //------ Проверка на ручное управление --------------------------------------------------------        
+      
+      //------ Проверка на ручное управление ---------------------------------------
         for (uint8_t byte=0;byte<4;byte++){
             if(relaySet[byte]==1) {relOut[byte]=ON;  relayOut |= (1<<(byte));} // ручной On
             if(relaySet[byte]==0) {relOut[byte]=OFF; relayOut &= ~(1<<(byte));}// ручной Off

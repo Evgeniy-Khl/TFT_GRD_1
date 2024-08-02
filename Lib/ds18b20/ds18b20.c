@@ -1,4 +1,5 @@
 #include "ds18b20.h"
+#include "my.h"
 
 //--------------------------------------------------
 uint8_t LastDeviceFlag;
@@ -6,9 +7,8 @@ uint8_t LastDiscrepancy;
 uint8_t LastFamilyDiscrepancy;
 uint8_t ROM_NO[8];
 extern char buffTFT[];
-extern uint8_t familycode[8][8];
-extern uint8_t ds18b20_amount;
-extern int16_t ds18b20_val[], pvT, pvRH;
+extern uint8_t familycode[MAX_DEVICE][8], ds18b20_amount;
+extern int16_t ds18b20_val[MAX_DEVICE], pvT, pvRH;
 
 //--------------------------------------------------
 __STATIC_INLINE void DelayMicro(__IO uint32_t micros){
