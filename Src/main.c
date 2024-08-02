@@ -61,7 +61,7 @@ RTC_DateTypeDef sDate;
 
 char buffTFT[40];
 const char* modeName[4]={"ясьшммъ","нафюпйю","йновеммъ","бюпшммъ"};
-const char* setName[MAX_SET]={"пефхл","t йюлепх","t опндсйрю","рпхбюкшярэ","опндсбюммъ"};
+const char* setName[MAX_SET]={"пефхл","t йюлепх","t опндсйрю","рпхбюкшярэ","опндсбюммъ","ьбхдйшярэ"};
 int16_t set[MAX_SET], newval[MAX_SET];
 uint8_t displ_num=0, mode, newButt=1, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom=ILI9341_HEIGHT-22, buttonAmount, secTick, card=0, status=0;
 uint8_t familycode[MAX_SENSOR][8];

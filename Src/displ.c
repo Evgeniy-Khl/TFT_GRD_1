@@ -141,7 +141,11 @@ void displ_2(void){
     else if(i==3) sprintf(buffTFT,"%12s: %iгод.%02iхвл.", setName[i], set[i]/60, set[i]%60);
     else {
       sprintf(buffTFT,"%12s: %3i", setName[i], set[i]);
-      if(i==4) strcat(buffTFT,"сек."); else strcat(buffTFT,"грд.");
+      switch (i){
+      	case 4: strcat(buffTFT,"сек.");	break;
+      	case 5: strcat(buffTFT,"%");	break;
+      	default: strcat(buffTFT,"грд."); break;
+      }
     }
     if(i == numSet){color_txt = ILI9341_BLACK; color_box = ILI9341_WHITE;} else {color_txt = ILI9341_WHITE; color_box = ILI9341_BLACK;}
     ILI9341_WriteString(X_left, Y_txt, buffTFT, Font_11x18, color_txt, color_box);

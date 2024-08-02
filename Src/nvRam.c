@@ -11,10 +11,10 @@ extern int16_t set[MAX_SET];
 struct Config{
   uint32_t magicNum; //0x19630301
   uint8_t mode;
-  uint16_t modeSet0[5];
-  uint16_t modeSet1[5];
-  uint16_t modeSet2[5];
-  uint16_t modeSet3[5];
+  uint16_t modeSet0[MAX_SET];
+  uint16_t modeSet1[MAX_SET];
+  uint16_t modeSet2[MAX_SET];
+  uint16_t modeSet3[MAX_SET];
   int8_t relaySet[8];
   int8_t analogSet[2];
   uint16_t checkSum;
@@ -28,10 +28,10 @@ union {
 
 void setData(uint8_t m){
   switch (m){
-  	case 0: for(uint8_t i=0;i<5;i++){set[i] = dataRAM.config.modeSet0[i];} break;
-  	case 1: for(uint8_t i=0;i<5;i++){set[i] = dataRAM.config.modeSet1[i];} break;
-    case 2: for(uint8_t i=0;i<5;i++){set[i] = dataRAM.config.modeSet2[i];} break;
-  	case 3: for(uint8_t i=0;i<5;i++){set[i] = dataRAM.config.modeSet3[i];} break;
+  	case 0: for(uint8_t i=0;i<MAX_SET;i++){set[i] = dataRAM.config.modeSet0[i];} break;
+  	case 1: for(uint8_t i=0;i<MAX_SET;i++){set[i] = dataRAM.config.modeSet1[i];} break;
+    case 2: for(uint8_t i=0;i<MAX_SET;i++){set[i] = dataRAM.config.modeSet2[i];} break;
+  	case 3: for(uint8_t i=0;i<MAX_SET;i++){set[i] = dataRAM.config.modeSet3[i];} break;
   	default: mode = dataRAM.config.mode = 0; for(uint8_t i=0;i<5;i++){set[i] = dataRAM.config.modeSet0[i];}	break;
   }
 }
@@ -73,24 +73,28 @@ void initData(void){
     dataRAM.config.modeSet0[2]=50;// грд
     dataRAM.config.modeSet0[3]=180;// мин
     dataRAM.config.modeSet0[4]=160;// сек
+    dataRAM.config.modeSet0[5]=30;// %
     
     dataRAM.config.modeSet1[0]=71;// грд
     dataRAM.config.modeSet1[1]=61;// грд
     dataRAM.config.modeSet1[2]=51;// грд
     dataRAM.config.modeSet1[3]=181;// мин
     dataRAM.config.modeSet1[4]=161;// сек
+    dataRAM.config.modeSet1[5]=50;// %
     
     dataRAM.config.modeSet2[0]=72;// грд
     dataRAM.config.modeSet2[1]=62;// грд
     dataRAM.config.modeSet2[2]=52;// грд
     dataRAM.config.modeSet2[3]=182;// мин
     dataRAM.config.modeSet2[4]=162;// сек
+    dataRAM.config.modeSet2[5]=70;// %
     
     dataRAM.config.modeSet3[0]=73;// грд
     dataRAM.config.modeSet3[1]=63;// грд
     dataRAM.config.modeSet3[2]=53;// грд
     dataRAM.config.modeSet3[3]=183;// мин
     dataRAM.config.modeSet3[4]=163;// сек
+    dataRAM.config.modeSet2[5]=100;// %
     
     for(uint8_t i=0;i<8;i++){dataRAM.config.relaySet[i]=-1;}
     for(uint8_t i=0;i<2;i++){dataRAM.config.analogSet[i]=-1;}
