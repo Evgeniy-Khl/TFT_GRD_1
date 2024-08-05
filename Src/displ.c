@@ -121,7 +121,7 @@ void displ_1(void){
 
 //--------- ЌјЋјЎ“”¬јЌЌя ----------------------------------
 void displ_2(void){
-  uint8_t i;
+  int8_t i;
   uint16_t color_txt, color_box;
 
   Y_txt = Y_top; X_left = 5;
@@ -135,8 +135,8 @@ void displ_2(void){
     drawButton(ILI9341_YELLOW, 3, "¬ибыр");
   }
   Y_txt = Y_txt+10;
-  for (i=0; i<MAX_SET; i++){
-    if(i==0) sprintf(buffTFT,"%12s: %8s", setName[i], modeName[mode]);
+  for (i=-1; i<MAX_SET; i++){
+    if(i==-1) sprintf(buffTFT,"       –≈∆»ћ: %8s", modeName[mode]);
     else if(i==3) sprintf(buffTFT,"%12s: %iгод.%02iхвл.", setName[i], set[i]/60, set[i]%60);
     else {
       sprintf(buffTFT,"%12s: %3i", setName[i], set[i]);
@@ -167,8 +167,7 @@ void displ_3(void){
   Y_txt = Y_txt+50;
   sprintf(buffTFT,"%12s:", setName[numSet]);
   ILI9341_WriteString(X_left+20, Y_txt, buffTFT, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
-  
-//  if(numSet==0) sprintf(buffTFT,"%8s", modeName[numSet]);
+
   if(numSet==3) sprintf(buffTFT,"%iгод.%02iхвл.", newval[numSet]/60, newval[numSet]%60);
   else sprintf(buffTFT,"%3i", newval[numSet]);
   if(numSet==3) ILI9341_WriteString(X_left+180, Y_txt, buffTFT, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
@@ -193,7 +192,7 @@ void displ_4(void){
     drawButton(ILI9341_YELLOW, 3, "¬ибыр");
   }
   Y_txt = Y_txt+10;
-  for (i=0; i<MAX_SET; i++){
+  for (i=0; i<MAX_MODE; i++){
     sprintf(buffTFT,"%10s", modeName[i]);
     if(i == newval[0]){color_txt = ILI9341_BLACK; color_box = ILI9341_WHITE;} else {color_txt = ILI9341_WHITE; color_box = ILI9341_BLACK;}
     ILI9341_WriteString(X_left, Y_txt, buffTFT, Font_11x18, color_txt, color_box);

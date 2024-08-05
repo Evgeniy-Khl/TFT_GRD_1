@@ -1,5 +1,6 @@
 #include "my.h"
 #include "rtc.h"
+#include "nvRam.h"
 #include "tft_proc.h"
 #include "ili9341_touch.h"
 
@@ -23,8 +24,9 @@ void TFT_init(){
   ILI9341_Init();
   ILI9341_FillScreen(fillScreen);
   Y_txt = 5; X_left = 5;
-  ILI9341_WriteString(45, Y_txt, "TFT_GRD v 0.0", Font_11x18, ILI9341_YELLOW, fillScreen);
-  Y_txt = Y_txt+18+5;
+  ILI9341_WriteString(35, Y_txt, "GRD Max", Font_16x26, ILI9341_WHITE, fillScreen);
+  ILI9341_WriteString(165, Y_txt+5, " v 2.8", Font_11x18, ILI9341_WHITE, fillScreen);
+  Y_txt = Y_txt+18+35;
 }
 
 void WindowDraw(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t setcolor, const char* str){
@@ -171,8 +173,8 @@ void checkButtons(uint8_t item){
         switch (item){
           case 0: displ_num = 0; newButt = 1; break;
           case 1: if (++numSet>MAX_SET) numSet = MAX_SET;	break;
-          case 2: if (--numSet<0) numSet = 0;	break;
-          case 3: if(numSet) {newval[numSet] = set[numSet]; displ_num = 3;} 
+          case 2: if (--numSet<-1) numSet = -1;	break;
+          case 3: if(numSet>=0) {newval[numSet] = set[numSet]; displ_num = 3;} 
                   else {newval[0] = mode; displ_num = 4;}
                   newButt = 1; 
           break;
@@ -186,12 +188,11 @@ void checkButtons(uint8_t item){
           case 2: --newval[numSet];	break;
           case 3: 
             ILI9341_FillRectangle(0, Y_top, ILI9341_WIDTH, ILI9341_HEIGHT, fillScreen);
-            ILI9341_WriteString(60, Y_top+80, "ÂÈÊÎÍÀÞ ÇÀÏÈÑ!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
-//            sprintf(buffTFT,"X=%6d Y=%6d",*x, *y);
-            ILI9341_WriteString(100, Y_bottom - 8, "counter = 0000", Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
-            set[numSet] = newval[numSet];
-            
-//            writeSetToBackup(RTC_BKP_DR2);                    // çàïèøåì íîâûå çíà÷åíèÿ óñòàíîâîê
+            ILI9341_WriteString(60, Y_top+60, "ÂÈÊÎÍÀÞ ÇÀÏÈÑ!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
+            set[numSet] = newval[numSet];     // óñòàíîâèì íîâûå çíà÷åíèÿ
+            uint32_t er = writeData();        // çàïèøåì çíà÷åíèÿ âî FLASH
+            if(er) ILI9341_WriteString(100, Y_top+90, "ÏÎÌÈËÊÀ!", Font_11x18, ILI9341_YELLOW, ILI9341_RED);
+            else ILI9341_WriteString(120, Y_top+90, "OK", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
             HAL_Delay(1000);
             displ_num = 2; newButt = 1; break;
         }
@@ -200,15 +201,16 @@ void checkButtons(uint8_t item){
       case 4://--------- ÇÌ²ÍÀ ÐÅÆÈÌÓ ----------------------------------
         switch (item){
           case 0: displ_num = 2; newButt = 1; break;
-          case 1: if(++newval[0]>3) newval[0] = 3;	break;
+          case 1: if(++newval[0]>MAX_MODE-1) newval[0] = MAX_MODE-1;	break;
           case 2: if(--newval[0]<0) newval[0] = 0;	break;
           case 3: 
             ILI9341_FillRectangle(0, Y_top, ILI9341_WIDTH, ILI9341_HEIGHT, fillScreen);
-            ILI9341_WriteString(60, Y_top+80, "ÂÈÊÎÍÀÞ ÇÀÏÈÑ!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
-          
-            ILI9341_WriteString(100, Y_bottom - 8, "counter = 0000", Font_7x10, ILI9341_WHITE, ILI9341_BLACK);
+            ILI9341_WriteString(60, Y_top+60, "ÂÈÊÎÍÀÞ ÇÀÏÈÑ!", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
             mode = newval[0];
-            setData(mode);                    // çàïèøåì íîâûå çíà÷åíèÿ óñòàíîâîê
+            setData(mode);                    // óñòàíîâèì íîâûå çíà÷åíèÿ
+            uint32_t er = writeData();        // çàïèøåì çíà÷åíèÿ âî FLASH
+            if(er) ILI9341_WriteString(100, Y_top+90, "ÏÎÌÈËÊÀ!", Font_11x18, ILI9341_YELLOW, ILI9341_RED);
+            else ILI9341_WriteString(120, Y_top+90, "OK", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);
             HAL_Delay(1000);
             displ_num = 2; newButt = 1;
             break;

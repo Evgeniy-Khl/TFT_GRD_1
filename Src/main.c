@@ -31,6 +31,7 @@
 #include "displ.h"
 #include "rtc.h"
 #include "my.h"
+#include "nvRam.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +49,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+CRC_HandleTypeDef hcrc;
+
 RTC_HandleTypeDef hrtc;
 
 SPI_HandleTypeDef hspi1;
@@ -61,14 +64,13 @@ RTC_DateTypeDef sDate;
 
 char buffTFT[40];
 const char* modeName[4]={"СУШЫННЯ","ОБЖАРКА","КОПЧЕННЯ","ВАРЫННЯ"};
-const char* setName[MAX_SET]={"РЕЖИМ","t КАМЕРИ","t ПРОДУКТА","ТРИВАЛЫСТЬ","ПРОДУВАННЯ","ШВИДКЫСТЬ"};
+const char* setName[MAX_SET]={"t КАМЕРИ","t ПРОДУКТА","t ВОЛОГОСТЫ","ТРИВАЛЫСТЬ","ПРОДУВАННЯ","ШВИДКЫСТЬ"};
 int16_t set[MAX_SET], newval[MAX_SET];
 uint8_t displ_num=0, mode, newButt=1, ticTimer, ticTouch, show, Y_txt, X_left, Y_top, Y_bottom=ILI9341_HEIGHT-22, buttonAmount, status=0;
 uint8_t familycode[MAX_SENSOR][8];
 int8_t ds18b20_amount, numSet=0, resetDispl=0;
 int16_t ds18b20_val[MAX_SENSOR], pvT, pvRH;
 uint16_t touch_x, touch_y, fillScreen = ILI9341_BLACK, checkTime;
-
 
 int8_t relaySet[8]={-1,-1,-1,-1,-1,-1,-1,-1};
 int8_t analogSet[2]={-1,-1};
@@ -84,8 +86,9 @@ static void MX_SPI2_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_RTC_Init(void);
+static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
-void initData(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -137,13 +140,31 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM1_Init();
   MX_RTC_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
 //  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);  // LED_PB1=ON
   
   HAL_TIM_Base_Start_IT(&htim1);          /* ------  таймер 100Гц.  период  10 мс.  ----*/
   HAL_RTCEx_SetSecond_IT(&hrtc);
   TFT_init();
-  initData();
+  uint8_t err = initData();
+  switch (err){
+  	case 0: ILI9341_WriteString(5, Y_txt, "Ыныцыалызацыя успышна.", Font_11x18, ILI9341_GREEN, ILI9341_BLACK);	break;
+  	case 1: ILI9341_WriteString(5, Y_txt, "Первинна ыныцыалызацыя.", Font_11x18, ILI9341_YELLOW, ILI9341_BLACK);	break;
+    case 3: ILI9341_WriteString(5, Y_txt, "Помилки читання FLASH!", Font_11x18, ILI9341_YELLOW, ILI9341_RED);	break;
+  	default:ILI9341_WriteString(5, Y_txt, "Невыдома помилка!", Font_11x18, ILI9341_MAGENTA, ILI9341_BLACK);	break;
+  }
+  Y_txt = Y_txt+18+5;
+  
+  if(err){
+    sprintf(buffTFT,"Check sum: 0x%08X",dataRAM.config.checkSum);
+    ILI9341_WriteString(5, Y_txt, buffTFT, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
+    Y_txt = Y_txt+18+5;
+    sprintf(buffTFT,"Number of saves: %u",dataRAM.config.countSave);
+    ILI9341_WriteString(5, Y_txt, buffTFT, Font_11x18, ILI9341_WHITE, ILI9341_BLACK);
+    Y_txt = Y_txt+18+5;
+    HAL_Delay(3000);
+  }
   //---------------------------- линия 1-Wire -----------------------------------
   ds18b20_port_init();
   ds18b20_count(MAX_SENSOR);   // проверяем наличие датчиков если item = 0 датчики найдены
@@ -156,10 +177,10 @@ int main(void)
   Y_txt = Y_txt+18+5;
   //---------------------------- линия AM2301 ----------------------------------- 
   if(startDHT()){ 
-    ILI9341_WriteString(5, Y_txt, "Датчик выдносноъ вологосты 1 шт.", Font_11x18, ILI9341_CYAN, ILI9341_BLACK);
+    ILI9341_WriteString(5, Y_txt, "Выдносноъ вологосты    1 шт.", Font_11x18, ILI9341_CYAN, ILI9341_BLACK);
     Y_txt = Y_txt+18+5;
   }
-  HAL_Delay(1000);
+  HAL_Delay(3000);
   ILI9341_FillScreen(fillScreen);
   /* USER CODE END 2 */
 
@@ -244,6 +265,32 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
+
 }
 
 /**
